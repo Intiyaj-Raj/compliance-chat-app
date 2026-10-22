@@ -13,3 +13,4 @@ npm run dev   # http://localhost:3000
 ```
 
 Node.js 20.9 or newer is required. Day 2 builds on this folder.
+`feat(threads): add mock data, useChat state hook and thread sidebar with groups, rename, pin, delete`

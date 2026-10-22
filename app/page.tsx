@@ -1,51 +1,55 @@
-import { ArrowUp, Paperclip, Plus, MessagesCircle } from "lucide-react";
+"use client";
+import { useState } from "react";
+import Sidebar from "@/components/Sidebar";
+import { useChat } from "@/lib/useChat";
 
 export default function Page() {
+  const chat = useChat();
+  const t = chat.threads.find((x) => x.id === chat.active);
+  if (!chat.ready || !t)
+    return (
+      <div className="grid h-dvh place-items-center bg-paper text-slate-500">
+        Loading threads…
+      </div>
+    );
+
   return (
     <div className="flex h-dvh bg-paper text-slate-800">
-      <aside className="hidden w-72 flex-col bg-ink text-slate-200 md:flex">
-        <div className="flex items-center gap-2 px-4 pb-4 pt-5">
-          <MessagesCircle size={18} className="text-mark" />
-          <span className="font-semibold tracking-tight text-white">
-            Glynac Compliance
-          </span>
-        </div>
-        <button
-          disabled
-          className="mx-3 mb-3 flex items-center justify-center gap-2 rounded-lg bg-mark px-3 py-2 text-sm font-medium text-white opacity-80"
-        >
-          <Plus size={16} /> New thread
-        </button>
-        <div className="space-y-2 px-4 pt-2">
-          {[60, 45, 70].map((w) => (
-            <div
-              key={w}
-              className="h-3 rounded bg-white/10"
-              style={{ width: w + "%" }}
-            />
-          ))}
-        </div>
-      </aside>
+      <Sidebar
+        threads={chat.threads}
+        active={chat.active}
+        onNew={chat.create}
+        onPick={chat.select}
+        onRename={chat.rename}
+        onPin={chat.pin}
+        onDelete={chat.remove}
+      />
       <main className="flex min-w-0 flex-1 flex-col">
         <header className="border-b border-slate-300/70 bg-white/70 px-4 py-3 font-semibold text-ink">
-          New thread
+          {t.title}
         </header>
-        <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
-          <h2 className="text-2xl font-semibold tracking-tight text-ink">
-            Ask about a rule, clause or disclosure
-          </h2>
-          <p className="mt-2 text-slate-500">
-            Answers will cite the rule they rely on.
-          </p>
-        </div>
-        <div className="px-4 pb-4">
-          <div className="mx-auto flex max-w-3xl items-center gap-2 rounded-2xl bg-white p-3 ring-1 ring-slate-300">
-            <Paperclip size={18} className="text-slate-400" />
-            <span className="flex-1 text-sm text-slate-400">
-              Ask a compliance question…
-            </span>
-            <ArrowUp size={18} className="text-slate-300" />
-          </div>
+        <div className="flex-1 space-y-4 overflow-y-auto p-6">
+          {t.msgs.map((m) => {
+            const text =
+              chat.live?.id === m.id
+                ? m.text.split(/(\s+)/).slice(0, chat.live.n).join("")
+                : m.text;
+            return (
+              <div
+                key={m.id}
+                className={
+                  m.role === "user"
+                    ? "ml-auto w-fit max-w-xl rounded-2xl bg-ink px-4 py-2 text-sm text-white"
+                    : "max-w-2xl whitespace-pre-wrap font-serif leading-7"
+                }
+              >
+                {text}
+              </div>
+            );
+          })}
+          {chat.thinking && (
+            <p className="text-sm text-slate-500">Checking the rulebook…</p>
+          )}
         </div>
       </main>
     </div>
