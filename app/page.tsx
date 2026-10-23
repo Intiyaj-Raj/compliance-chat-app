@@ -5,6 +5,8 @@ import { useChat } from "@/lib/useChat";
 
 export default function Page() {
   const chat = useChat();
+  const busy = chat.thinking || !!chat.live;
+  const [draft, setDraft] = useState("");
   const t = chat.threads.find((x) => x.id === chat.active);
   if (!chat.ready || !t)
     return (
@@ -51,6 +53,29 @@ export default function Page() {
             <p className="text-sm text-slate-500">Checking the rulebook…</p>
           )}
         </div>
+        <form
+          className="flex gap-2 border-t border-slate-300/70 bg-white p-3"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (draft.trim() && !busy) {
+              chat.send(draft.trim());
+              setDraft("");
+            }
+          }}
+        >
+          <input
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder="Ask a compliance question…"
+            className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-mark"
+          />
+          <button
+            disabled={busy || !draft.trim()}
+            className="rounded-lg bg-ink px-4 py-2 text-sm text-white disabled:opacity-40"
+          >
+            Send
+          </button>
+        </form>
       </main>
     </div>
   );
