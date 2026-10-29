@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Message from "@/components/Message";
 import Sidebar from "@/components/Sidebar";
 import { useChat } from "@/lib/useChat";
 
@@ -30,28 +31,27 @@ export default function Page() {
         <header className="border-b border-slate-300/70 bg-white/70 px-4 py-3 font-semibold text-ink">
           {t.title}
         </header>
-        <div className="flex-1 space-y-4 overflow-y-auto p-6">
-          {t.msgs.map((m) => {
-            const text =
-              chat.live?.id === m.id
-                ? m.text.split(/(\s+)/).slice(0, chat.live.n).join("")
-                : m.text;
-            return (
-              <div
+        <div className="flex-1 overflow-y-auto px-4 py-6">
+          <div className="mx-auto flex max-w-3xl flex-col gap-6">
+            {t.msgs.map((m) => (
+              <Message
                 key={m.id}
-                className={
-                  m.role === "user"
-                    ? "ml-auto w-fit max-w-xl rounded-2xl bg-ink px-4 py-2 text-sm text-white"
-                    : "max-w-2xl whitespace-pre-wrap font-serif leading-7"
+                m={m}
+                hit={false}
+                shown={
+                  chat.live?.id === m.id
+                    ? m.text.split(/(\s+)/).slice(0, chat.live.n).join("")
+                    : undefined
                 }
-              >
-                {text}
-              </div>
-            );
-          })}
-          {chat.thinking && (
-            <p className="text-sm text-slate-500">Checking the rulebook…</p>
-          )}
+                onRegen={() => chat.regenerate(m.id)}
+                onVote={(v) => chat.vote(m.id, v)}
+                onEdit={(x) => chat.edit(m.id, x)}
+              />
+            ))}
+            {chat.thinking && (
+              <p className="text-sm text-slate-500">Checking the rulebook…</p>
+            )}
+          </div>
         </div>
         <form
           className="flex gap-2 border-t border-slate-300/70 bg-white p-3"
